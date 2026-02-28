@@ -1,0 +1,33 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الأصول | المعهد الوطني للعلوم الإدارية</title>
+
+    <!-- ملف manifest الخاص بتطبيق PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+
+    <!-- ملف CSS الخارجي -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- أو يمكنك كتابة CSS داخلي -->
+    <style>
+        body {
+            font-family: "Tahoma", Arial, sans-serif;
+            margin:0;
+            background:#f4f6f9;
+            direction: rtl;
+        }
+
+        /* إعدادات شاشة الدخول */
+        #loginPage {
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#0d6efd,#001f4d);
+        }
+
+        /* وهكذا تكمل باقي CSS ... */
+    </style>
+</head>

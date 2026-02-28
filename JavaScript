@@ -1,0 +1,44 @@
+// متغير لتتبع آخر رقم تم استخدامه
+let lastAssetNumber = parseInt(localStorage.getItem("lastAssetNumber")) || 0;
+
+// عند إضافة أصل جديد
+function addItem(){
+    const file = imageInput.files[0];
+    if(!file){
+        alert("أضف صورة");
+        return;
+    }
+
+    // توليد رقم أصل تلقائي
+    lastAssetNumber++;
+    const newAssetId = 'AS-' + lastAssetNumber.toString().padStart(4, '0'); // AS-0001
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        inventory.push({
+            assetId: newAssetId,      // الرقم التلقائي
+            itemName: itemName.value,
+            category: category.value,
+            department: department.value,
+            entryDate: entryDate.value,
+            condition: condition.value,
+            image: e.target.result
+        });
+
+        saveData();
+        renderTable();
+
+        // تحديث آخر رقم مستخدم في localStorage حتى يبقى بعد إعادة فتح الصفحة
+        localStorage.setItem("lastAssetNumber", lastAssetNumber);
+
+        // مسح الحقول (ما عدا assetId لأنه يولد تلقائياً)
+        itemName.value = '';
+        category.value = '';
+        department.value = '';
+        entryDate.value = '';
+        condition.value = '';
+        notes.value = '';
+        imageInput.value = '';
+    };
+    reader.readAsDataURL(file);
+}
