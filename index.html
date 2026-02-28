@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة الأصول | المعهد الوطني للعلوم الإدارية</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
+
+<style>
+body{
+    font-family:"Tahoma", Arial, sans-serif;
+    margin:0;
+    background:#f4f6f9;
+}
+
+/* شاشة الدخول */
+#loginPage{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0d6efd,#001f4d);
+}
+.login-box{
+    background:white;
+    padding:40px 30px;
+    width:90%;
+    max-width:420px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+    animation: officialFade 0.8s ease-out;
+}
+.login-box img{
+    width:95px;
+    height:95px;
+    object-fit:contain;
+    background:white;
+    padding:15px;
+    border-radius:50%;
+    border:3px solid #d4af37;
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    margin-bottom:15px;
+}
+.official-state{
+    text-align:center;
+    font-size:15px;
+    color:#0d6efd;
+    line-height:1.4;
+    margin-bottom:10px;
+}
+.institute-highlight{
+    font-weight:bold;
+    color:#ffb700;
+    font-size:16px;
+}
+.institute-highlight .branch{
+    display:block;
+    color:#198754;
+    font-size:15px;
+    margin-top:2px;
+}
+.system-title{
+    font-size:22px;
+    font-weight:900;
+    color:#0d6efd;
+    letter-spacing:1px;
+    margin-bottom:15px;
+}
+.login-box input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+.login-box input:focus{
+    border-color:#0d6efd;
+    outline:none;
+    background:#f1f7ff;
+}
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:linear-gradient(135deg,#0d6efd,#084298);
+    border:none;
+    color:white;
+    font-weight:bold;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+.login-box button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+#errorMsg{
+    color:#dc3545;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+/* حركة دخول */
+@keyframes officialFade{
+from{opacity:0; transform:translateY(40px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* هيدر النظام */
+.main-header{
+    background:linear-gradient(135deg,#0d6efd,#001f4d);
+    color:white;
+    padding:15px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+.logo{
+    width:60px;
+    height:auto;
+    object-fit:contain;
+}
+.logo-institute{
+    width:80px;
+    height:auto;
+    object-fit:contain;
+}
+.main-header span{
+    font-weight:bold;
+    font-size:18px;
+    text-align:center;
+    flex:1;
+}
+.logout-btn{
+    background:#dc3545;
+    padding:8px 14px;
+    border:none;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.logout-btn:hover{ opacity:0.85; }
+
+/* الحاوية */
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* عناوين الأقسام */
+.section-title{
+    font-size:20px;
+    font-weight:bold;
+    color:#0d6efd;
+    border-right:5px solid #0d6efd;
+    padding-right:10px;
+    margin-bottom:20px;
+}
+
+/* الحقول */
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0 15px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+input:focus, select:focus, textarea:focus{
+    border-color:#0d6efd;
+    outline:none;
+    background:#f8fbff;
+}
+
+/* الأزرار */
+.save-btn{
+    background:linear-gradient(135deg,#198754,#0f5132);
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.save-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(25,135,84,0.4);
+}
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* الجدول */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+th, td{
+    border:1px solid #dee2e6;
+    padding:10px;
+    text-align:center;
+    font-size:14px;
+}
+th{
+    background:#0d6efd;
+    color:white;
+}
+tr:nth-child(even){
+    background:#f8f9fa;
+}
+table img{
+    width:60px;
+    height:60px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+/* إجمالي القيمة */
+#totalValue{
+    text-align:right;
+    font-weight:bold;
+    margin-top:10px;
+    font-size:16px;
+}
+
+/* تجاوب */
+@media(max-width:768px){
+.main-header{flex-direction:column; gap:10px;}
+.main-header span{text-align:center;}
+.header-left{justify-content:center; gap:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- شاشة الدخول -->
+<div id="loginPage">
+    <div class="login-box">
+        <img src="assets/logo.png" alt="شعار الدخول">
+        <div class="official-state">
+            الجمهورية اليمنية<br>
+            <span class="institute-highlight">المعهد الوطني للعلوم الإدارية<br><span class="branch">فرع إب</span></span>
+        </div>
+        <div class="system-title">🏛️ الجرد الإلكتروني لإدارة الأصول</div>
+        <input type="text" id="username" placeholder="👤 اسم المستخدم">
+        <input type="password" id="password" placeholder="🔑 كلمة المرور">
+        <button onclick="login()">🚀 تسجيل الدخول</button>
+        <div id="errorMsg"></div>
+    </div>
+</div>
+
+<!-- النظام -->
+<div id="appPage" style="display:none;">
+<header class="main-header">
+    <div class="header-left">
+        <img src="assets/logo.png" class="logo" alt="شعار الجمهورية">
+        <img src="assets/logo-institute.png" class="logo-institute" alt="شعار المعهد">
+    </div>
+    <span>📊 إدارة أصول المعهد الوطني للعلوم الإدارية فرع إب</span>
+    <button class="logout-btn" onclick="logout()">🚪 تسجيل خروج</button>
+</header>
+
+<div class="container">
+<div class="section-title">➕ إضافة أصل جديد</div>
+<input type="text" id="assetId" placeholder="🔢 رقم الأصل" readonly>
+<input type="text" id="itemName" placeholder="🪑 اسم الصنف">
+<input type="text" id="category" placeholder="📂 الفئة">
+<input type="text" id="department" placeholder="🏢 القسم">
+<input type="text" id="location" placeholder="📍 الموقع">
+<input type="number" id="value" placeholder="💰 القيمة التقديرية">
+<input type="date" id="entryDate">
+<select id="condition">
+<option value="">📌 الحالة</option>
+<option>جيد</option>
+<option>يحتاج صيانة</option>
+<option>تالف</option>
+</select>
+<textarea id="notes" placeholder="📝 ملاحظات إضافية"></textarea>
+<input type="file" id="imageInput" accept="image/*">
+<button class="save-btn" onclick="addItem()">💾 حفظ الأصل</button>
+
+<hr>
+<div class="section-title">📋 سجل الأصول</div>
+<table>
+<thead>
+<tr>
+<th>رقم الأصل</th>
+<th>الصنف</th>
+<th>الفئة</th>
+<th>القسم</th>
+<th>الموقع</th>
+<th>القيمة التقديرية</th>
+<th>التاريخ</th>
+<th>الحالة</th>
+<th>الصورة</th>
+<th>حذف</th>
+</tr>
+</thead>
+<tbody id="inventoryTable"></tbody>
+</table>
+<div id="totalValue">إجمالي القيمة: 0 ريال يمني</div>
+</div>
+</div>
+
+<script>
+// تسجيل الدخول
+function login(){
+    if(username.value==="admin" && password.value==="1234"){
+        localStorage.setItem("loggedIn","true");
+        loginPage.style.display="none";
+        appPage.style.display="block";
+        setNextAssetId();
+        renderTable();
+    } else { errorMsg.innerText="بيانات غير صحيحة"; }
+}
+function logout(){
+    localStorage.removeItem("loggedIn");
+    location.reload();
+}
+if(localStorage.getItem("loggedIn")==="true"){
+    loginPage.style.display="none";
+    appPage.style.display="block";
+    setNextAssetId();
+    renderTable();
+}
+
+// الجرد
+let inventory = JSON.parse(localStorage.getItem("inventoryData")) || [];
+let lastAssetNumber = parseInt(localStorage.getItem("lastAssetNumber")) || 0;
+
+// حفظ البيانات
+function saveData(){ localStorage.setItem("inventoryData", JSON.stringify(inventory)); }
+
+// ترقيم تلقائي
+function getNextAssetId(){
+    lastAssetNumber++;
+    const newId = 'AS-' + lastAssetNumber.toString().padStart(4,'0');
+    assetId.value = newId;
+    return newId;
+}
+function setNextAssetId(){ getNextAssetId(); }
+
+// إضافة أصل جديد
+function addItem(){
+    const file = imageInput.files[0];
+    if(!file){ alert("أضف صورة"); return; }
+
+    const newAssetId = getNextAssetId();
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        inventory.push({
+            assetId: newAssetId,
+            itemName: itemName.value,
+            category: category.value,
+            department: department.value,
+            location: location.value,
+            value: parseFloat(value.value) || 0,
+            entryDate: entryDate.value,
+            condition: condition.value,
+            image: e.target.result
+        });
+        lastAssetNumber = parseInt(newAssetId.split('-')[1]);
+        localStorage.setItem("lastAssetNumber", lastAssetNumber);
+
+        saveData();
+        renderTable();
+
+        // مسح الحقول
+        itemName.value = '';
+        category.value = '';
+        department.value = '';
+        location.value = '';
+        value.value = '';
+        entryDate.value = '';
+        condition.value = '';
+        notes.value = '';
+        imageInput.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+// حذف أصل
+function deleteItem(i){
+    inventory.splice(i,1);
+    saveData();
+    renderTable();
+}
+
+// عرض الجدول وحساب الإجمالي
+function renderTable(){
+    inventoryTable.innerHTML = '';
+    let total = 0;
+    inventory.forEach((item,i)=>{
+        inventoryTable.innerHTML += `
+        <tr>
+            <td>${item.assetId}</td>
+            <td>${item.itemName}</td>
+            <td>${item.category}</td>
+            <td>${item.department}</td>
+            <td>${item.location}</td>
+            <td>${item.value.toLocaleString()}</td>
+            <td>${item.entryDate}</td>
+            <td>${item.condition}</td>
+            <td><img src="${item.image}"></td>
+            <td><button class="delete-btn" onclick="deleteItem(${i})">❌</button></td>
+        </tr>`;
+        total += item.value;
+    });
+    document.getElementById('totalValue').innerText = 'إجمالي القيمة: ' + total.toLocaleString() + ' ريال يمني';
+}
+</script>
+
+</body>
+</html>
