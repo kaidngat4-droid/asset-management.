@@ -178,3 +178,7 @@ function exportToJSON(){
 
 // تشغيل الجدول عند فتح الصفحة
 renderTable();
+function printReport(){
+    document.title = "تقرير الجرد";
+    window.location.href = "data:text/html;charset=utf-8," + encodeURIComponent(document.documentElement.outerHTML);
+}
