@@ -1,25 +1,38 @@
-// متغير لتتبع آخر رقم تم استخدامه
+
+// ================== تحميل البيانات ==================
+let inventory = JSON.parse(localStorage.getItem("inventoryData")) || [];
 let lastAssetNumber = parseInt(localStorage.getItem("lastAssetNumber")) || 0;
 
-// عند إضافة أصل جديد
+
+// ================== حفظ البيانات ==================
+function saveData(){
+    localStorage.setItem("inventoryData", JSON.stringify(inventory));
+    localStorage.setItem("lastAssetNumber", lastAssetNumber);
+}
+
+
+// ================== إضافة أصل جديد ==================
 function addItem(){
+
     const file = imageInput.files[0];
     if(!file){
         alert("أضف صورة");
         return;
     }
 
-    // توليد رقم أصل تلقائي
     lastAssetNumber++;
-    const newAssetId = 'AS-' + lastAssetNumber.toString().padStart(4, '0'); // AS-0001
+    const newAssetId = 'AS-' + lastAssetNumber.toString().padStart(4,'0');
 
     const reader = new FileReader();
     reader.onload = function(e){
+
         inventory.push({
-            assetId: newAssetId,      // الرقم التلقائي
+            assetId: newAssetId,
             itemName: itemName.value,
             category: category.value,
             department: department.value,
+            location: location.value,
+            value: parseFloat(value.value) || 0,
             entryDate: entryDate.value,
             condition: condition.value,
             image: e.target.result
@@ -28,17 +41,140 @@ function addItem(){
         saveData();
         renderTable();
 
-        // تحديث آخر رقم مستخدم في localStorage حتى يبقى بعد إعادة فتح الصفحة
-        localStorage.setItem("lastAssetNumber", lastAssetNumber);
-
-        // مسح الحقول (ما عدا assetId لأنه يولد تلقائياً)
-        itemName.value = '';
-        category.value = '';
-        department.value = '';
-        entryDate.value = '';
-        condition.value = '';
-        notes.value = '';
-        imageInput.value = '';
+        // مسح الحقول
+        itemName.value='';
+        category.value='';
+        department.value='';
+        location.value='';
+        value.value='';
+        entryDate.value='';
+        condition.value='';
+        imageInput.value='';
     };
+
     reader.readAsDataURL(file);
 }
+
+
+// ================== عرض الجدول ==================
+function renderTable(data = inventory){
+
+    inventoryTable.innerHTML = '';
+    let total = 0;
+
+    data.forEach((item, index)=>{
+
+        inventoryTable.innerHTML += `
+        <tr>
+            <td>${item.assetId}</td>
+            <td>${item.itemName}</td>
+            <td>${item.category || '-'}</td>
+            <td>${item.department || '-'}</td>
+            <td>${item.location || '-'}</td>
+            <td>${(item.value || 0).toLocaleString()}</td>
+            <td>${item.entryDate || '-'}</td>
+            <td>${item.condition || '-'}</td>
+            <td><img src="${item.image}" width="60"></td>
+            <td><button class="delete-btn" onclick="deleteItem(${index})">❌</button></td>
+        </tr>
+        `;
+
+        total += item.value || 0;
+    });
+
+    const totalElement = document.getElementById('totalValue');
+    if(totalElement){
+        totalElement.innerText = 
+        'إجمالي القيمة: ' + total.toLocaleString() + ' ريال يمني';
+    }
+}
+
+
+// ================== حذف أصل ==================
+function deleteItem(index){
+    inventory.splice(index,1);
+    saveData();
+    renderTable();
+}
+
+
+// ================== البحث ==================
+function searchTable(){
+
+    const searchValue = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+    const filtered = inventory.filter(item =>
+        item.assetId.toLowerCase().includes(searchValue) ||
+        item.itemName.toLowerCase().includes(searchValue)
+    );
+
+    renderTable(filtered);
+}
+
+
+// ================== تصدير Excel ==================
+function exportToExcel(){
+
+    if(inventory.length === 0){
+        alert("لا توجد بيانات للتصدير");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+    csvContent += "رقم الأصل,الصنف,الفئة,القسم,الموقع,القيمة,التاريخ,الحالة\n";
+
+    inventory.forEach(item=>{
+        csvContent += 
+        `${item.assetId},${item.itemName},${item.category},${item.department},${item.location},${item.value},${item.entryDate},${item.condition}\n`;
+    });
+
+    const link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = "inventory_report.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+// ================== مسح جميع البيانات ==================
+function clearAllData(){
+
+    if(confirm("هل أنت متأكد من حذف جميع بيانات الأصول؟")){
+        localStorage.removeItem("inventoryData");
+        localStorage.removeItem("lastAssetNumber");
+        inventory = [];
+        lastAssetNumber = 0;
+        renderTable();
+        alert("تم حذف جميع البيانات");
+    }
+}
+
+
+// ================== تصدير نسخة احتياطية JSON ==================
+function exportToJSON(){
+
+    if(inventory.length === 0){
+        alert("لا توجد بيانات");
+        return;
+    }
+
+    const dataStr = 
+    "data:text/json;charset=utf-8," + 
+    encodeURIComponent(JSON.stringify(inventory,null,2));
+
+    const link = document.createElement("a");
+    link.href = dataStr;
+    link.download = "inventory_backup.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+// تشغيل الجدول عند فتح الصفحة
+renderTable();
