@@ -285,13 +285,25 @@ table img{
 <div id="totalValue">إجمالي القيمة: 0 ريال يمني</div>
 
 <hr>
-
 <div style="text-align:center; margin-top:20px;">
-<button class="save-btn" onclick="exportToExcel()">📥 تنزيل Excel</button>
-<button class="save-btn" onclick="window.print()">🖨 طباعة</button>
-<button class="save-btn" onclick="exportToJSON()">💾 نسخة احتياطية</button>
-<button class="delete-btn" onclick="clearAllData()">🗑 مسح جميع البيانات</button>
+    <button class="save-btn" onclick="exportToExcel()">📥 تنزيل Excel</button>
+    <button class="save-btn" onclick="printReport()">🖨 طباعة</button>
+    <button class="save-btn" onclick="exportToJSON()">💾 نسخة احتياطية</button>
+    <button class="delete-btn" onclick="clearAllData()">🗑 مسح جميع البيانات</button>
 </div>
+
+<script>
+// دالة الطباعة مع دعم WebView
+function printReport() {
+    if (typeof window.print === 'function') {
+        // تشغيل الطباعة في المتصفح
+        window.print();
+    } else {
+        // داخل التطبيق: رسالة للمستخدم
+        alert("الطباعة متاحة عند فتح النظام في المتصفح فقط.");
+    }
+}
+</script>
 
 </div>
 </div>
