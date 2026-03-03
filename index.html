@@ -4,40 +4,210 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام إدارة الأصول | المعهد الوطني للعلوم الإدارية</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
+
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-body{font-family:"Tahoma", Arial, sans-serif; margin:0; background:#f4f6f9;}
-#loginPage{height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#0d6efd,#001f4d);}
-.login-box{background:white; padding:40px 30px; width:90%; max-width:420px; border-radius:20px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.35);}
-.login-box img{width:95px; height:95px; object-fit:contain; background:white; padding:15px; border-radius:50%; border:3px solid #d4af37; margin-bottom:15px;}
-.official-state{font-size:15px; color:#0d6efd; line-height:1.4; margin-bottom:10px;}
-.institute-highlight{font-weight:bold; color:#d4af37; font-size:16px;}
-.institute-highlight .branch{display:block; color:#198754; font-size:15px;}
-.system-title{font-family:'Aref Ruqaa', serif; font-size:26px; font-weight:700; color:#0d6efd; margin-bottom:15px;}
-.login-box input{width:100%; padding:12px; margin:10px 0; border-radius:10px; border:1px solid #ccc;}
-.login-box button{width:100%; padding:12px; background:linear-gradient(135deg,#0d6efd,#084298); border:none; color:white; font-weight:bold; border-radius:10px; cursor:pointer;}
-#errorMsg{color:#dc3545; margin-top:10px; font-weight:bold;}
-.main-header{background:linear-gradient(135deg,#0d6efd,#001f4d); color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;}
-.header-left{display:flex; align-items:center; gap:15px;}
-.logo{width:60px;}
-.logo-institute{width:80px;}
-.main-header span{font-family:'Aref Ruqaa', serif; font-weight:bold; font-size:20px; text-align:center; flex:1;}
-.logout-btn{background:#dc3545; padding:8px 14px; border:none; color:white; border-radius:8px; cursor:pointer; font-weight:bold;}
-.container{width:95%; max-width:1200px; margin:30px auto; background:white; padding:25px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.08);}
-.section-title{font-size:20px; font-weight:bold; color:#0d6efd; border-right:5px solid #0d6efd; padding-right:10px; margin-bottom:20px;}
-input, select, textarea{width:100%; padding:10px; margin:8px 0 15px; border-radius:8px; border:1px solid #ccc;}
-.save-btn{background:linear-gradient(135deg,#198754,#0f5132); color:white; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight:bold;}
-.delete-btn{background:#dc3545; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;}
-table{width:100%; border-collapse:collapse; margin-top:20px;}
-th, td{border:1px solid #dee2e6; padding:10px; text-align:center;}
-th{background:#0d6efd; color:white;}
-tr:nth-child(even){background:#f8f9fa;}
-table img{width:60px; height:60px; object-fit:cover; border-radius:8px;}
-#totalValue{text-align:right; font-weight:bold; margin-top:10px; font-size:16px;}
+body{
+    font-family:"Tahoma", Arial, sans-serif;
+    margin:0;
+    background:#f4f6f9;
+}
+
+/* شاشة الدخول */
+#loginPage{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0d6efd,#001f4d);
+}
+.login-box{
+    background:white;
+    padding:40px 30px;
+    width:90%;
+    max-width:420px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+}
+.login-box img{
+    width:95px;
+    height:95px;
+    object-fit:contain;
+    background:white;
+    padding:15px;
+    border-radius:50%;
+    border:3px solid #d4af37;
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    margin-bottom:15px;
+}
+.official-state{
+    font-size:15px;
+    color:#0d6efd;
+    line-height:1.4;
+    margin-bottom:10px;
+}
+.institute-highlight{
+    font-weight:bold;
+    color:#d4af37;
+    font-size:16px;
+}
+.institute-highlight .branch{
+    display:block;
+    color:#198754;
+    font-size:15px;
+}
+
+.system-title{
+    font-family:'Aref Ruqaa', serif;
+    font-size:26px;
+    font-weight:700;
+    color:#0d6efd;
+    margin-bottom:15px;
+}
+
+.login-box input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:linear-gradient(135deg,#0d6efd,#084298);
+    border:none;
+    color:white;
+    font-weight:bold;
+    border-radius:10px;
+    cursor:pointer;
+}
+#errorMsg{
+    color:#dc3545;
+    margin-top:10px;
+    font-weight:bold;
+}
+/* الهيدر */
+.main-header{
+    background:linear-gradient(135deg,#0d6efd,#001f4d);
+    color:white;
+    padding:15px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+.logo{ width:60px; }
+.logo-institute{ width:80px; }
+
+.main-header span{
+    font-family:'Aref Ruqaa', serif;
+    font-weight:bold;
+    font-size:20px;
+    text-align:center;
+    flex:1;
+}
+
+.logout-btn{
+    background:#dc3545;
+    padding:8px 14px;
+    border:none;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.section-title{
+    font-size:20px;
+    font-weight:bold;
+    color:#0d6efd;
+    border-right:5px solid #0d6efd;
+    padding-right:10px;
+    margin-bottom:20px;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0 15px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+.save-btn{
+    background:linear-gradient(135deg,#198754,#0f5132);
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+th, td{
+    border:1px solid #dee2e6;
+    padding:10px;
+    text-align:center;
+}
+th{
+    background:#0d6efd;
+    color:white;
+}
+tr:nth-child(even){
+    background:#f8f9fa;
+}
+table img{
+    width:60px;
+    height:60px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+#totalValue{
+    text-align:right;
+    font-weight:bold;
+    margin-top:10px;
+    font-size:16px;
+}
 </style>
 </head>
 
 <body>
+
 <!-- شاشة الدخول -->
 <div id="loginPage">
     <div class="login-box">
@@ -59,6 +229,7 @@ table img{width:60px; height:60px; object-fit:cover; border-radius:8px;}
 
 <!-- النظام -->
 <div id="appPage" style="display:none;">
+
 <header class="main-header">
     <div class="header-left">
         <img src="assets/logo.png" class="logo">
@@ -69,7 +240,9 @@ table img{width:60px; height:60px; object-fit:cover; border-radius:8px;}
 </header>
 
 <div class="container">
+
 <div class="section-title">➕ إضافة أصل جديد</div>
+
 <input type="text" id="assetId" placeholder="رقم الأصل" readonly>
 <input type="text" id="itemName" placeholder="اسم الصنف">
 <input type="text" id="category" placeholder="الفئة">
@@ -87,7 +260,9 @@ table img{width:60px; height:60px; object-fit:cover; border-radius:8px;}
 <button class="save-btn" onclick="addItem()">حفظ الأصل</button>
 
 <hr>
+
 <div class="section-title">📋 سجل الأصول</div>
+
 <input type="text" id="searchInput" placeholder="بحث..." onkeyup="searchTable()">
 <table>
 <thead>
@@ -106,18 +281,24 @@ table img{width:60px; height:60px; object-fit:cover; border-radius:8px;}
 </thead>
 <tbody id="inventoryTable"></tbody>
 </table>
+
 <div id="totalValue">إجمالي القيمة: 0 ريال يمني</div>
 
 <hr>
+
 <div style="text-align:center; margin-top:20px;">
 <button class="save-btn" onclick="exportToExcel()">📥 تنزيل Excel</button>
-<button class="save-btn" onclick="printReport()">🖨 طباعة</button>
+<button class="save-btn" onclick="window.print()">🖨 طباعة</button>
 <button class="save-btn" onclick="exportToJSON()">💾 نسخة احتياطية</button>
 <button class="delete-btn" onclick="clearAllData()">🗑 مسح جميع البيانات</button>
 </div>
 
 </div>
 </div>
+
+<!-- مكتبة ExcelJS -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
 <script>
 let inventory = JSON.parse(localStorage.getItem("inventoryData")) || [];
 let lastAssetNumber = parseInt(localStorage.getItem("lastAssetNumber")) || 0;
@@ -129,20 +310,37 @@ function login(){
         appPage.style.display="block";
         setNextAssetId();
         renderTable();
-    } else { errorMsg.innerText="بيانات غير صحيحة"; }
+    } else {
+        errorMsg.innerText="بيانات غير صحيحة";
+    }
 }
 
-function logout(){ localStorage.removeItem("loggedIn"); location.reload(); }
+function logout(){
+    localStorage.removeItem("loggedIn");
+    location.reload();
+}
 
-if(localStorage.getItem("loggedIn")==="true"){ loginPage.style.display="none"; appPage.style.display="block"; setNextAssetId(); renderTable(); }
+if(localStorage.getItem("loggedIn")==="true"){
+    loginPage.style.display="none";
+    appPage.style.display="block";
+    setNextAssetId();
+    renderTable();
+}
 
-function saveData(){ localStorage.setItem("inventoryData", JSON.stringify(inventory)); localStorage.setItem("lastAssetNumber", lastAssetNumber); }
+function saveData(){
+    localStorage.setItem("inventoryData", JSON.stringify(inventory));
+    localStorage.setItem("lastAssetNumber", lastAssetNumber);
+}
 
-function setNextAssetId(){ lastAssetNumber++; assetId.value='AS-'+lastAssetNumber.toString().padStart(4,'0'); }
+function setNextAssetId(){
+    lastAssetNumber++;
+    assetId.value='AS-'+lastAssetNumber.toString().padStart(4,'0');
+}
 
 function addItem(){
     const file=imageInput.files[0];
-    if(!file){alert("أضف صورة"); return;}
+    if(!file){alert("أضف صورة");return;}
+
     const reader=new FileReader();
     reader.onload=function(e){
         inventory.push({
@@ -159,40 +357,49 @@ function addItem(){
         saveData();
         renderTable();
         setNextAssetId();
-        itemName.value=''; category.value=''; department.value=''; location.value=''; value.value=''; entryDate.value=''; condition.value=''; imageInput.value='';
     };
     reader.readAsDataURL(file);
 }
 
-function deleteItem(i){ inventory.splice(i,1); saveData(); renderTable(); }
+function deleteItem(i){
+    inventory.splice(i,1);
+    saveData();
+    renderTable();
+}
 
 function renderTable(){
     inventoryTable.innerHTML='';
     let total=0;
+
     inventory.forEach((item,i)=>{
         inventoryTable.innerHTML+=`
         <tr>
         <td>${item.assetId}</td>
         <td>${item.itemName}</td>
-        <td>${item.category}</td>
-        <td>${item.department}</td>
-        <td>${item.location}</td>
+        <td>${item.category||'-'}</td>
+        <td>${item.department||'-'}</td>
+        <td>${item.location||'-'}</td>
         <td>${item.value.toLocaleString()}</td>
-        <td>${item.entryDate}</td>
-        <td>${item.condition}</td>
-        <td><img src="${item.image}"></td>
+        <td>${item.entryDate||'-'}</td>
+        <td>${item.condition||'-'}</td>
+        <td><img src="${item.image}" width="60"></td>
         <td><button class="delete-btn" onclick="deleteItem(${i})">❌</button></td>
         </tr>`;
         total+=item.value;
     });
+
     totalValue.innerText='إجمالي القيمة: '+total.toLocaleString()+' ريال يمني';
 }
 
 function searchTable(){
     const val=searchInput.value.toLowerCase();
-    const filtered=inventory.filter(item=> item.assetId.toLowerCase().includes(val) || item.itemName.toLowerCase().includes(val));
+    const filtered=inventory.filter(item=>
+        item.assetId.toLowerCase().includes(val) ||
+        item.itemName.toLowerCase().includes(val)
+    );
+
     inventoryTable.innerHTML='';
-    filtered.forEach((item,i)=>{
+    filtered.forEach(item=>{
         inventoryTable.innerHTML+=`
         <tr>
         <td>${item.assetId}</td>
@@ -209,59 +416,113 @@ function searchTable(){
     });
 }
 
-function exportToExcel(){
-    if(inventory.length===0){ alert("لا توجد بيانات للتصدير"); return; }
-    let csv="رقم الأصل,الصنف,الفئة,القسم,الموقع,القيمة,التاريخ,الحالة\n";
-    inventory.forEach(item=>{ csv+=`${item.assetId},${item.itemName},${item.category},${item.department},${item.location},${item.value},${item.entryDate},${item.condition}\n`; });
-    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+<!-- ================== تصدير Excel احترافي ================== -->
+async function exportToExcel(){
+
+    if(inventory.length===0){
+        alert("لا توجد بيانات للتصدير");
+        return;
+    }
+
+    const workbook=new ExcelJS.Workbook();
+    const worksheet=workbook.addWorksheet("تقرير الأصول");
+
+    worksheet.mergeCells('A1:I2');
+    worksheet.getCell('A1').value=
+    "تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
+    worksheet.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
+    worksheet.getCell('A1').font={size:16,bold:true};
+
+    worksheet.addRow([]);
+
+    const headerRow=worksheet.addRow([
+        "رقم الأصل","الصنف","الفئة","القسم",
+        "الموقع","القيمة","التاريخ","الحالة","الصورة"
+    ]);
+
+    headerRow.eachCell(cell=>{
+        cell.font={bold:true};
+        cell.alignment={horizontal:'center'};
+        cell.border={
+            top:{style:'thin'},
+            left:{style:'thin'},
+            bottom:{style:'thin'},
+            right:{style:'thin'}
+        };
+    });
+
+    for(const item of inventory){
+
+        const row=worksheet.addRow([
+            item.assetId,
+            item.itemName,
+            item.category,
+            item.department,
+            item.location,
+            item.value,
+            item.entryDate,
+            item.condition,
+            ""
+        ]);
+
+        row.height=65;
+
+        if(item.image){
+            const imageId=workbook.addImage({
+                base64:item.image,
+                extension:'png'
+            });
+
+            worksheet.addImage(imageId,{
+                tl:{col:8,row:row.number-1},
+                ext:{width:60,height:60}
+            });
+        }
+
+        row.eachCell(cell=>{
+            cell.alignment={horizontal:'center',vertical:'middle'};
+            cell.border={
+                top:{style:'thin'},
+                left:{style:'thin'},
+                bottom:{style:'thin'},
+                right:{style:'thin'}
+            };
+        });
+    }
+
+    worksheet.columns=[
+        {width:15},{width:20},{width:15},{width:15},
+        {width:15},{width:15},{width:15},{width:15},{width:20}
+    ];
+
+    const buffer=await workbook.xlsx.writeBuffer();
+    const blob=new Blob([buffer],{
+        type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
     const link=document.createElement("a");
     link.href=URL.createObjectURL(blob);
-    link.download="inventory.csv";
+    link.download="تقرير_الجرد.xlsx";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
 function exportToJSON(){
-    if(inventory.length===0){ alert("لا توجد بيانات"); return; }
-    const blob=new Blob([JSON.stringify(inventory,null,2)],{type:"application/json"});
     const link=document.createElement("a");
-    link.href=URL.createObjectURL(blob);
+    link.href="data:text/json;charset=utf-8,"+
+    encodeURIComponent(JSON.stringify(inventory,null,2));
     link.download="inventory_backup.json";
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
 }
 
 function clearAllData(){
-    if(confirm("هل أنت متأكد؟")){ inventory=[]; lastAssetNumber=0; localStorage.clear(); renderTable(); }
-}
-
-// ✅ طباعة مع الصور
-function printReport(){
-    if(!inventory || inventory.length===0){ alert("لا توجد بيانات للطباعة"); return; }
-    const printWindow = window.open('','_blank');
-    let html='<html dir="rtl"><head><title>تقرير الأصول</title><style>table{width:100%;border-collapse:collapse;}th,td{border:1px solid #000;padding:5px;text-align:center;}th{background:#0d6efd;color:white;} img{width:50px;height:50px;object-fit:cover;border-radius:5px;}</style></head><body>';
-    html+='<h2 style="text-align:center;">تقرير الجرد الإلكتروني</h2>';
-    html+='<table><tr><th>رقم الأصل</th><th>الصنف</th><th>الفئة</th><th>القسم</th><th>الموقع</th><th>القيمة</th><th>التاريخ</th><th>الحالة</th><th>الصورة</th></tr>';
-    inventory.forEach(item=>{
-        html+=`<tr>
-        <td>${item.assetId}</td>
-        <td>${item.itemName}</td>
-        <td>${item.category}</td>
-        <td>${item.department}</td>
-        <td>${item.location}</td>
-        <td>${item.value.toLocaleString()}</td>
-        <td>${item.entryDate}</td>
-        <td>${item.condition}</td>
-        <td><img src="${item.image}"></td>
-        </tr>`;
-    });
-    html+='</table></body></html>';
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.print();
+    if(confirm("هل أنت متأكد؟")){
+        localStorage.clear();
+        location.reload();
+    }
 }
 </script>
+
 </body>
 </html>
