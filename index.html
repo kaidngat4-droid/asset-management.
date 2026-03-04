@@ -36,7 +36,6 @@ table img{width:60px;height:60px;object-fit:cover;border-radius:8px;}
 </style>
 </head>
 <body>
-
 <!-- صفحة تسجيل الدخول -->
 <div id="loginPage">
     <div class="login-box">
@@ -111,24 +110,19 @@ table img{width:60px;height:60px;object-fit:cover;border-radius:8px;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-
 <script>
 //////////////////////////
 // IndexedDB
 //////////////////////////
 let db, lastAssetNumber = 0;
-let userRole = localStorage.getItem("userRole") || "user";
+let userRole = "admin"; // مؤقت
 
-const request = indexedDB.open("AssetDatabase", 3);
+const request = indexedDB.open("AssetDatabase", 4);
 
 request.onupgradeneeded = e=>{
     db = e.target.result;
-    if(!db.objectStoreNames.contains("assets")){
-        const store = db.createObjectStore("assets",{keyPath:"assetId"});
-    }
-    if(!db.objectStoreNames.contains("settings")){
-        db.createObjectStore("settings",{keyPath:"key"});
-    }
+    if(!db.objectStoreNames.contains("assets")) db.createObjectStore("assets",{keyPath:"assetId"});
+    if(!db.objectStoreNames.contains("settings")) db.createObjectStore("settings",{keyPath:"key"});
 };
 
 request.onsuccess = e=>{
@@ -158,7 +152,7 @@ function saveLastAssetNumber(){
 }
 
 function setNextAssetId(){
-    assetId.value = 'AS-' + (lastAssetNumber+1).toString().padStart(4,'0');
+    document.getElementById("assetId").value = 'AS-'+(lastAssetNumber+1).toString().padStart(4,'0');
 }
 
 // صلاحية المدير
@@ -173,24 +167,24 @@ function addItem(){
 
     lastAssetNumber++;
     const newAssetId='AS-'+lastAssetNumber.toString().padStart(4,'0');
-    const qty = parseInt(quantity.value) || 1;
-    const val = parseFloat(value.value)||0;
-    const dep = parseFloat(depreciation.value)||0;
-    const entry = new Date(entryDate.value);
-    const age = entryDate.value ? ((new Date().getFullYear()) - entry.getFullYear()) : 0;
-    const finalValue = ((val*qty)*(1 - dep/100)).toFixed(2);
+    const qty=parseInt(quantity.value)||1;
+    const val=parseFloat(value.value)||0;
+    const dep=parseFloat(depreciation.value)||0;
+    const entry=entryDate.value? new Date(entryDate.value): null;
+    const age = entry ? new Date().getFullYear()-entry.getFullYear():0;
+    const finalValue = ((val*qty)*(1-dep/100)).toFixed(2);
 
-    const reader = new FileReader();
-    reader.onload = e=>{
-        const newItem = {
-            assetId: newAssetId,
+    const reader=new FileReader();
+    reader.onload=e=>{
+        const newItem={
+            assetId:newAssetId,
             itemName:itemName.value.trim(),
-            quantity: qty,
-            value: val,
-            depreciation: dep,
-            age: age,
-            finalValue: parseFloat(finalValue),
-            entryDate: entryDate.value||'',
+            quantity:qty,
+            value:val,
+            depreciation:dep,
+            age:age,
+            finalValue:parseFloat(finalValue),
+            entryDate:entryDate.value||'',
             image:e.target.result
         };
         const tx=db.transaction("assets","readwrite");
@@ -208,7 +202,6 @@ function addItem(){
 function clearForm(){
     itemName.value=''; quantity.value='1'; value.value=''; depreciation.value='0'; entryDate.value=''; imageInput.value='';
 }
-
 //////////////////////////
 // عرض البيانات
 //////////////////////////
@@ -234,10 +227,9 @@ function renderTable(){
                 <td><img src="${item.image}" width="60"></td>
                 <td><button class="delete-btn" onclick="deleteItem('${item.assetId}')">❌</button></td>
             </tr>`;
-            total += item.finalValue;
+            total+=item.finalValue;
             cursor.continue();
-        }
-        totalValue.innerText='إجمالي القيمة بعد الاهلاك: '+total.toLocaleString()+' ريال يمني';
+        } else { totalValue.innerText='إجمالي القيمة بعد الاهلاك: '+total.toLocaleString()+' ريال يمني'; }
     };
 }
 
@@ -280,21 +272,23 @@ function searchTable(){
         }
     };
 }
-//////////////////////////
-// Excel مع الصور
+  //////////////////////////
+// تنزيل Excel احترافي
 //////////////////////////
 async function exportToExcel(){
-    const workbook = new ExcelJS.Workbook();
-    const ws = workbook.addWorksheet("تقرير الأصول");
+    const workbook=new ExcelJS.Workbook();
+    const ws=workbook.addWorksheet("تقرير الأصول");
+    // عناوين
     ws.mergeCells('A1:H2');
     ws.getCell('A1').value="تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
     ws.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
     ws.getCell('A1').font={size:16,bold:true,color:{argb:'FF0D6EFD'}};
+    
     ws.addRow([]);
     const header = ["رقم الأصل","الصنف","العدد","القيمة","نسبة الاهلاك %","العمر (سنة)","القيمة بعد الاهلاك","التاريخ","الصورة"];
-    ws.addRow(header).eachCell(c=>{ c.font={bold:true}; c.alignment={horizontal:'center'}; });
-    
-    const tx=db.transaction("assets","readonly");
+    ws.addRow(header).eachCell(c=>{c.font={bold:true}; c.alignment={horizontal:'center'}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFD966'}};});
+
+    const tx=db.transaction("assets","readonly"); 
     const store=tx.objectStore("assets");
     const items=[];
     await new Promise(resolve=>{
@@ -303,20 +297,21 @@ async function exportToExcel(){
             if(cursor){ items.push(cursor.value); cursor.continue(); } else { resolve(); }
         };
     });
+
     for(const item of items){
-        const row = ws.addRow([item.assetId,item.itemName,item.quantity,item.value,item.depreciation,item.age,item.finalValue,item.entryDate,""]);
+        const row=ws.addRow([item.assetId,item.itemName,item.quantity,item.value,item.depreciation,item.age,item.finalValue,item.entryDate,""]);
         row.height=65;
         if(item.image){
             const imgId=workbook.addImage({base64:item.image,extension:'png'});
             ws.addImage(imgId,{tl:{col:8,row:row.number-1},ext:{width:60,height:60}});
         }
-        row.eachCell(c=>{ c.alignment={horizontal:'center',vertical:'middle'}; });
+        row.eachCell(c=>{c.alignment={horizontal:'center',vertical:'middle'};});
     }
     ws.columns=[{width:15},{width:20},{width:10},{width:12},{width:15},{width:10},{width:18},{width:15},{width:20}];
-    const buf = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
+    const buf=await workbook.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
     link.download="تقرير_الجرد.xlsx";
     link.click();
 }
@@ -325,7 +320,8 @@ async function exportToExcel(){
 // النسخة الاحتياطية
 //////////////////////////
 function exportToJSON(){
-    const tx=db.transaction("assets","readonly"); const store=tx.objectStore("assets");
+    const tx=db.transaction("assets","readonly");
+    const store=tx.objectStore("assets");
     const items=[];
     store.openCursor().onsuccess=e=>{
         const cursor=e.target.result;
@@ -339,7 +335,7 @@ function exportToJSON(){
 }
 
 //////////////////////////
-// مسح جميع البيانات
+// مسح البيانات
 //////////////////////////
 function clearAllData(){
     if(confirm("هل أنت متأكد؟")){
@@ -349,78 +345,30 @@ function clearAllData(){
         };
     }
 }
-
-//////////////////////////
+    //////////////////////////
 // تسجيل الدخول والخروج
 //////////////////////////
 function login(){
     if(username.value==="admin" && password.value==="1234"){
         localStorage.setItem("loggedIn","true");
         localStorage.setItem("userRole","admin");
-        loginPage.style.display="none"; appPage.style.display="block";
+        loginPage.style.display="none";
+        appPage.style.display="block";
     } else { errorMsg.innerText="بيانات غير صحيحة"; }
 }
 
 function logout(){
-    localStorage.removeItem("loggedIn"); localStorage.removeItem("userRole"); location.reload();
-}
-<!DOCTYPE html>
-}
-
-//////////////////////////
-// النسخة الاحتياطية
-//////////////////////////
-function exportToJSON(){
-    const tx=db.transaction("assets","readonly"); const store=tx.objectStore("assets");
-    const items=[];
-    store.openCursor().onsuccess=e=>{
-        const cursor=e.target.result;
-        if(cursor){ items.push(cursor.value); cursor.continue(); }
-        else{
-            const link=document.createElement("a");
-            link.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(items,null,2));
-            link.download="inventory_backup.json"; link.click();
-        }
-    };
+    localStorage.removeItem("loggedIn"); localStorage.removeItem("userRole");
+    location.reload();
 }
 
-//////////////////////////
-// مسح جميع البيانات
-//////////////////////////
-function clearAllData(){
-    if(confirm("هل أنت متأكد؟")){
-        const tx=db.transaction("assets","readwrite"); tx.objectStore("assets").clear();
-        tx.oncomplete=()=>{
-            lastAssetNumber=0; saveLastAssetNumber(); renderTable(); setNextAssetId();
-        };
+// تفعيل الدخول التلقائي
+window.addEventListener('load',()=>{
+    if(localStorage.getItem("loggedIn")==="true"){
+        loginPage.style.display="none";
+        appPage.style.display="block";
     }
-}
-
-//////////////////////////
-// تسجيل الدخول والخروج
-//////////////////////////
-function login(){
-    if(username.value==="admin" && password.value==="1234"){
-        localStorage.setItem("loggedIn","true");
-        localStorage.setItem("userRole","admin");
-        loginPage.style.display="none"; appPage.style.display="block";
-    } else { errorMsg.innerText="بيانات غير صحيحة"; }
-}
-
-function logout(){
-    localStorage.removeItem("loggedIn"); localStorage.removeItem("userRole"); location.reload();
-}
-
-if(localStorage.getItem("loggedIn")==="true"){
-    loginPage.style.display="none"; appPage.style.display="block";
-}
-</script>
-</body>
-</html>
-
-if(localStorage.getItem("loggedIn")==="true"){
-    loginPage.style.display="none"; appPage.style.display="block";
-}
+});
 </script>
 </body>
 </html>
