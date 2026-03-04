@@ -297,199 +297,18 @@ table img{
 </div>
 
 <!-- مكتبة ExcelJS -->
-<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+     <script>
 
-<script>
-let inventory = JSON.parse(localStorage.getItem("inventoryData")) || [];
-let lastAssetNumber = parseInt(localStorage.getItem("lastAssetNumber")) || 0;
-
-function login(){
-    if(username.value==="admin" && password.value==="1234"){
-        localStorage.setItem("loggedIn","true");
-        loginPage.style.display="none";
-        appPage.style.display="block";
-        setNextAssetId();
-        renderTable();
-    } else {
-        errorMsg.innerText="بيانات غير صحيحة";
-    }
-}
-
-function logout(){
-    localStorage.removeItem("loggedIn");
-    location.reload();
-}
-
-if(localStorage.getItem("loggedIn")==="true"){
-    loginPage.style.display="none";
-    appPage.style.display="block";
-    setNextAssetId();
-    renderTable();
-}
-
-function saveData(){
-    localStorage.setItem("inventoryData", JSON.stringify(inventory));
-    localStorage.setItem("lastAssetNumber", lastAssetNumber);
-}
-
-function setNextAssetId(){
-    lastAssetNumber++;
-    assetId.value='AS-'+lastAssetNumber.toString().padStart(4,'0');
-}
-
-function addItem(){
-    const file=imageInput.files[0];
-    if(!file){alert("أضف صورة");return;}
-
-    const reader=new FileReader();
-    reader.onload=function(e){
-        inventory.push({
-            assetId:assetId.value,
-            itemName:itemName.value,
-            category:category.value,
-            department:department.value,
-            location:location.value,
-            value:parseFloat(value.value)||0,
-            entryDate:entryDate.value,
-            condition:condition.value,
-            image:e.target.result
-        });
-        saveData();
-        renderTable();
-        setNextAssetId();
-    };
-    reader.readAsDataURL(file);
-}
-
-function deleteItem(i){
-    inventory.splice(i,1);
-    saveData();
-    renderTable();
-}
-
-function renderTable(){
-    inventoryTable.innerHTML='';
-    let total=0;
-
-    inventory.forEach((item,i)=>{
-        inventoryTable.innerHTML+=`
-        <tr>
-        <td>${item.assetId}</td>
-        <td>${item.itemName}</td>
-        <td>${item.category||'-'}</td>
-        <td>${item.department||'-'}</td>
-        <td>${item.location||'-'}</td>
-        <td>${item.value.toLocaleString()}</td>
-        <td>${item.entryDate||'-'}</td>
-        <td>${item.condition||'-'}</td>
-        <td><img src="${item.image}" width="60"></td>
-        <td><button class="delete-btn" onclick="deleteItem(${i})">❌</button></td>
-        </tr>`;
-        total+=item.value;
-    });
-
-    totalValue.innerText='إجمالي القيمة: '+total.toLocaleString()+' ريال يمني';
-}
-
-function searchTable(){
-    const val=searchInput.value.toLowerCase();
-    const filtered=inventory.filter(item=>
-        item.assetId.toLowerCase().includes(val) ||
-        item.itemName.toLowerCase().includes(val)
-    );
-
-    inventoryTable.innerHTML='';
-    filtered.forEach(item=>{
-        inventoryTable.innerHTML+=`
-        <tr>
-        <td>${item.assetId}</td>
-        <td>${item.itemName}</td>
-        <td>${item.category}</td>
-        <td>${item.department}</td>
-        <td>${item.location}</td>
-        <td>${item.value.toLocaleString()}</td>
-        <td>${item.entryDate}</td>
-        <td>${item.condition}</td>
-        <td><img src="${item.image}" width="60"></td>
-        <td></td>
-        </tr>`;
-    });
-}
-
-<!-- ================== تصدير Excel احترافي ================== -->
-async function exportToExcel(){
-
-    if(inventory.length===0){
-        alert("لا توجد بيانات للتصدير");
-        return;
-    }
-
-    const workbook=new ExcelJS.Workbook();
-    const worksheet=workbook.addWorksheet("تقرير الأصول");
-
-    worksheet.mergeCells('A1:I2');
-    worksheet.getCell('A1').value=
-    "تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
-    worksheet.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
-    worksheet.getCell('A1').font={size:16,bold:true};
-
-    worksheet.addRow([]);
-
-    const headerRow=worksheet.addRow([
-        "رقم الأصل","الصنف","الفئة","القسم",
-        "الموقع","القيمة","التاريخ","الحالة","الصورة"
-    ]);
-
-    headerRow.eachCell(cell=>{
-        cell.font={bold:true};
-        cell.alignment={horizontal:'center'};
-        cell.border={
-            top:{style:'thin'},
-            left:{style:'thin'},
-            bottom:{style:'thin'},
-            right:{style:'thin'}
-        };
-    });
-
-    for(const item of inventory){
-
-        const row=worksheet.addRow([
-            item.assetId,
-            item.itemName,
-            item.category,
-            item.department,
-            item.location,
-            item.value,
-            item.entryDate,
-            item.condition,
-            ""
-        ]);
-
-        row.height=65;
-
-        if(item.image){
-            const imageId=workbook.addImage({
-                base64:item.image,
-                extension:'png'
-            });
-
-            worksheet.addImage(imageId,{
-                tl:{col:8,row:row.number-1},
-                ext:{width:60,height:60}
-            });
-<script>
-
-//////////////////////////////
-// تسجيل الدخول (يبقى كما هو)
-//////////////////////////////
+//////////////////////////
+// تسجيل الدخول
+//////////////////////////
 
 function login(){
     if(username.value==="admin" && password.value==="1234"){
         localStorage.setItem("loggedIn","true");
         loginPage.style.display="none";
         appPage.style.display="block";
-        renderTable();
-    } else {
+    }else{
         errorMsg.innerText="بيانات غير صحيحة";
     }
 }
@@ -504,24 +323,22 @@ if(localStorage.getItem("loggedIn")==="true"){
     appPage.style.display="block";
 }
 
-//////////////////////////////
-// إعداد IndexedDB
-//////////////////////////////
+//////////////////////////
+// إعداد قاعدة البيانات
+//////////////////////////
 
 let db;
 let lastAssetNumber = 0;
 
-const request = indexedDB.open("AssetDatabase", 1);
+const request = indexedDB.open("AssetDatabase",1);
 
 request.onupgradeneeded = function(e){
     db = e.target.result;
-
     if(!db.objectStoreNames.contains("assets")){
-        db.createObjectStore("assets",{ keyPath:"assetId" });
+        db.createObjectStore("assets",{keyPath:"assetId"});
     }
-
     if(!db.objectStoreNames.contains("settings")){
-        db.createObjectStore("settings",{ keyPath:"key" });
+        db.createObjectStore("settings",{keyPath:"key"});
     }
 };
 
@@ -531,27 +348,23 @@ request.onsuccess = function(e){
     renderTable();
 };
 
-request.onerror = function(){
-    alert("فشل فتح قاعدة البيانات");
-};
-
-//////////////////////////////
+//////////////////////////
 // إدارة رقم الأصل
-//////////////////////////////
+//////////////////////////
 
 function loadLastNumber(){
-    const tx = db.transaction("settings","readonly");
-    const store = tx.objectStore("settings");
-    const req = store.get("lastNumber");
+    const tx=db.transaction("settings","readonly");
+    const store=tx.objectStore("settings");
+    const req=store.get("lastNumber");
 
-    req.onsuccess = function(){
-        lastAssetNumber = req.result ? req.result.value : 0;
+    req.onsuccess=function(){
+        lastAssetNumber=req.result?req.result.value:0;
         setNextAssetId();
     };
 }
 
 function saveLastNumber(){
-    const tx = db.transaction("settings","readwrite");
+    const tx=db.transaction("settings","readwrite");
     tx.objectStore("settings").put({
         key:"lastNumber",
         value:lastAssetNumber
@@ -559,21 +372,18 @@ function saveLastNumber(){
 }
 
 function setNextAssetId(){
-    assetId.value = 'AS-' + 
-    (lastAssetNumber + 1).toString().padStart(4,'0');
+    assetId.value='AS-'+(lastAssetNumber+1)
+    .toString().padStart(4,'0');
 }
 
-//////////////////////////////
+//////////////////////////
 // إضافة أصل
-//////////////////////////////
+//////////////////////////
 
 function addItem(){
 
     const file=imageInput.files[0];
-    if(!file){
-        alert("أضف صورة");
-        return;
-    }
+    if(!file){ alert("أضف صورة"); return; }
 
     const reader=new FileReader();
 
@@ -607,28 +417,13 @@ function addItem(){
     reader.readAsDataURL(file);
 }
 
-//////////////////////////////
-// مسح النموذج
-//////////////////////////////
-
-function clearForm(){
-    itemName.value='';
-    category.value='';
-    department.value='';
-    location.value='';
-    value.value='';
-    entryDate.value='';
-    condition.value='';
-    imageInput.value='';
-}
-
-//////////////////////////////
+//////////////////////////
 // عرض البيانات
-//////////////////////////////
+//////////////////////////
 
 function renderTable(){
 
-    inventoryTable.innerHTML='';
+    inventoryTable.innerHTML="";
     let total=0;
 
     const tx=db.transaction("assets","readonly");
@@ -637,7 +432,6 @@ function renderTable(){
     store.openCursor().onsuccess=function(e){
 
         const cursor=e.target.result;
-
         if(cursor){
 
             const item=cursor.value;
@@ -654,109 +448,61 @@ function renderTable(){
                 <td>${item.condition||'-'}</td>
                 <td><img src="${item.image}" width="60"></td>
                 <td>
-                    <button class="delete-btn" onclick="deleteItem('${item.assetId}')">❌</button>
+                    <button class="delete-btn"
+                    onclick="deleteItem('${item.assetId}')">❌</button>
                 </td>
-            </tr>
-            `;
+            </tr>`;
 
             total+=item.value||0;
-
             cursor.continue();
         }
 
         totalValue.innerText=
-        'إجمالي القيمة: '+total.toLocaleString()+' ريال يمني';
+        "إجمالي القيمة: "+total.toLocaleString()+" ريال يمني";
     };
 }
 
-//////////////////////////////
+//////////////////////////
 // حذف أصل
-//////////////////////////////
+//////////////////////////
 
 function deleteItem(id){
-
-    if(confirm("هل تريد حذف هذا الأصل؟")){
-
+    if(confirm("هل تريد الحذف؟")){
         const tx=db.transaction("assets","readwrite");
         tx.objectStore("assets").delete(id);
-
         tx.oncomplete=function(){
             renderTable();
         };
     }
 }
+//////////////////////////
+// مسح النموذج
+//////////////////////////
 
-//////////////////////////////
-// البحث
-//////////////////////////////
-
-function searchTable(){
-
-    const val=searchInput.value.toLowerCase();
-
-    inventoryTable.innerHTML='';
-
-    const tx=db.transaction("assets","readonly");
-    const store=tx.objectStore("assets");
-
-    store.openCursor().onsuccess=function(e){
-
-        const cursor=e.target.result;
-
-        if(cursor){
-
-            const item=cursor.value;
-
-            if(
-                item.assetId.toLowerCase().includes(val) ||
-                item.itemName.toLowerCase().includes(val)
-            ){
-                inventoryTable.innerHTML+=`
-                <tr>
-                    <td>${item.assetId}</td>
-                    <td>${item.itemName}</td>
-                    <td>${item.category}</td>
-                    <td>${item.department}</td>
-                    <td>${item.location}</td>
-                    <td>${item.value.toLocaleString()}</td>
-                    <td>${item.entryDate}</td>
-                    <td>${item.condition}</td>
-                    <td><img src="${item.image}" width="60"></td>
-                    <td></td>
-                </tr>`;
-            }
-
-            cursor.continue();
-        }
-    };
+function clearForm(){
+    itemName.value="";
+    category.value="";
+    department.value="";
+    location.value="";
+    value.value="";
+    entryDate.value="";
+    condition.value="";
+    imageInput.value="";
 }
 
-//////////////////////////////
-// تصدير Excel احترافي
-//////////////////////////////
+//////////////////////////
+// تصدير Excel
+//////////////////////////
 
 async function exportToExcel(){
 
     const workbook=new ExcelJS.Workbook();
     const worksheet=workbook.addWorksheet("تقرير الأصول");
 
-    worksheet.mergeCells('A1:I2');
-    worksheet.getCell('A1').value=
-    "تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
-    worksheet.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
-    worksheet.getCell('A1').font={size:16,bold:true};
-
-    worksheet.addRow([]);
-
-    const headerRow=worksheet.addRow([
+    worksheet.addRow([
         "رقم الأصل","الصنف","الفئة","القسم",
-        "الموقع","القيمة","التاريخ","الحالة","الصورة"
+        "الموقع","القيمة","التاريخ","الحالة"
     ]);
-
-    headerRow.eachCell(cell=>{
-        cell.font={bold:true};
-        cell.alignment={horizontal:'center'};
-    });
 
     const tx=db.transaction("assets","readonly");
     const store=tx.objectStore("assets");
@@ -775,9 +521,8 @@ async function exportToExcel(){
         };
     });
 
-    for(const item of rows){
-
-        const row=worksheet.addRow([
+    rows.forEach(item=>{
+        worksheet.addRow([
             item.assetId,
             item.itemName,
             item.category,
@@ -785,24 +530,9 @@ async function exportToExcel(){
             item.location,
             item.value,
             item.entryDate,
-            item.condition,
-            ""
+            item.condition
         ]);
-
-        row.height=65;
-
-        if(item.image){
-            const imageId=workbook.addImage({
-                base64:item.image,
-                extension:'png'
-            });
-
-            worksheet.addImage(imageId,{
-                tl:{col:8,row:row.number-1},
-                ext:{width:60,height:60}
-            });
-        }
-    }
+    });
 
     const buffer=await workbook.xlsx.writeBuffer();
     const blob=new Blob([buffer],{
@@ -815,17 +545,14 @@ async function exportToExcel(){
     link.click();
 }
 
-//////////////////////////////
+//////////////////////////
 // مسح جميع البيانات
-//////////////////////////////
+//////////////////////////
 
 function clearAllData(){
-
     if(confirm("هل أنت متأكد؟")){
-
         const tx=db.transaction("assets","readwrite");
         tx.objectStore("assets").clear();
-
         tx.oncomplete=function(){
             lastAssetNumber=0;
             saveLastNumber();
@@ -834,7 +561,7 @@ function clearAllData(){
     }
 }
 
-</script>
+</script>       
 
 </body>
 </html>
