@@ -4,9 +4,9 @@
 
 let db;
 let lastAssetNumber = 0;
-let userRole = localStorage.getItem("userRole") || "user";
+let userRole = localStorage.getItem("userRole") || "admin"; // مؤقتاً مدير
 
-const request = indexedDB.open("AssetDatabase", 1);
+const request = indexedDB.open("AssetDatabase", 2);
 
 request.onupgradeneeded = function(e){
     db = e.target.result;
@@ -28,31 +28,39 @@ request.onsuccess = function(e){
 };
 
 request.onerror = function(){
-    alert("خطأ في فتح قاعدة البيانات");
+    alert("فشل في فتح قاعدة البيانات");
 };
 
 // =========================
-// تحميل آخر رقم أصل
+// إدارة رقم الأصل
 // =========================
 
 function loadLastAssetNumber(){
-    const tx = db.transaction(["settings"], "readonly");
+    const tx = db.transaction("settings", "readonly");
     const store = tx.objectStore("settings");
     const req = store.get("lastAssetNumber");
 
     req.onsuccess = function(){
         lastAssetNumber = req.result ? req.result.value : 0;
+        setNextAssetId(); // مهم جداً
     };
 }
 
 function saveLastAssetNumber(){
-    const tx = db.transaction(["settings"], "readwrite");
-    const store = tx.objectStore("settings");
-    store.put({ key:"lastAssetNumber", value:lastAssetNumber });
+    const tx = db.transaction("settings", "readwrite");
+    tx.objectStore("settings").put({
+        key:"lastAssetNumber",
+        value:lastAssetNumber
+    });
+}
+
+function setNextAssetId(){
+    document.getElementById("assetId").value =
+        'AS-' + (lastAssetNumber + 1).toString().padStart(4,'0');
 }
 
 // =========================
-// صلاحية المدير
+// التحقق من صلاحية المدير
 // =========================
 
 function isAdmin(){
@@ -95,14 +103,14 @@ function addItem(){
             image: e.target.result
         };
 
-        const tx = db.transaction(["assets"], "readwrite");
-        const store = tx.objectStore("assets");
-        store.put(newItem);
+        const tx = db.transaction("assets", "readwrite");
+        tx.objectStore("assets").put(newItem);
 
         tx.oncomplete = function(){
             saveLastAssetNumber();
             renderTable();
             clearForm();
+            setNextAssetId(); // تجهيز الرقم الجديد
         };
     };
 
@@ -125,7 +133,7 @@ function clearForm(){
 }
 
 // =========================
-// عرض الجدول
+// عرض البيانات
 // =========================
 
 function renderTable(){
@@ -133,7 +141,7 @@ function renderTable(){
     inventoryTable.innerHTML = '';
     let total = 0;
 
-    const tx = db.transaction(["assets"], "readonly");
+    const tx = db.transaction("assets", "readonly");
     const store = tx.objectStore("assets");
 
     store.openCursor().onsuccess = function(e){
@@ -184,30 +192,28 @@ function deleteItem(assetId){
 
     if(confirm("هل تريد حذف هذا الأصل؟")){
 
-        const tx = db.transaction(["assets"], "readwrite");
-        const store = tx.objectStore("assets");
-        store.delete(assetId);
+        const tx = db.transaction("assets", "readwrite");
+        tx.objectStore("assets").delete(assetId);
 
         tx.oncomplete = function(){
             renderTable();
         };
     }
 }
+
 // =========================
 // البحث
 // =========================
 
 function searchTable(){
 
-    const searchValue = document
-        .getElementById("searchInput")
-        .value
-        .toLowerCase()
-        .trim();
+    const searchValue =
+        document.getElementById("searchInput").value
+        .toLowerCase().trim();
 
     inventoryTable.innerHTML = '';
 
-    const tx = db.transaction(["assets"], "readonly");
+    const tx = db.transaction("assets", "readonly");
     const store = tx.objectStore("assets");
 
     store.openCursor().onsuccess = function(e){
@@ -243,7 +249,7 @@ function searchTable(){
 }
 
 // =========================
-// تصدير Excel (CSV)
+// تصدير CSV
 // =========================
 
 function exportToExcel(){
@@ -256,11 +262,12 @@ function exportToExcel(){
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
     csvContent += "رقم الأصل,الصنف,الفئة,القسم,الموقع,القيمة,التاريخ,الحالة\n";
 
-    const tx = db.transaction(["assets"], "readonly");
+    const tx = db.transaction("assets", "readonly");
     const store = tx.objectStore("assets");
 
     store.openCursor().onsuccess = function(e){
         const cursor = e.target.result;
+
         if(cursor){
             const item = cursor.value;
 
@@ -272,9 +279,7 @@ function exportToExcel(){
             const link = document.createElement("a");
             link.href = encodeURI(csvContent);
             link.download = "inventory_report.csv";
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
         }
     };
 }
@@ -292,14 +297,14 @@ function clearAllData(){
 
     if(confirm("هل أنت متأكد من حذف جميع البيانات؟")){
 
-        const tx = db.transaction(["assets"], "readwrite");
-        const store = tx.objectStore("assets");
-        store.clear();
+        const tx = db.transaction("assets", "readwrite");
+        tx.objectStore("assets").clear();
 
         tx.oncomplete = function(){
             lastAssetNumber = 0;
             saveLastAssetNumber();
             renderTable();
+            setNextAssetId();
             alert("تم حذف جميع البيانات");
         };
     }
