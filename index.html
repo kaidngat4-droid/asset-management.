@@ -335,7 +335,7 @@ function exportToJSON(){
             link.download="inventory_backup.json"; link.click();
         }
     };
-                }
+                
    //////////////////////////
 // مسح البيانات
 //////////////////////////
@@ -373,5 +373,11 @@ window.addEventListener('load',()=>{
     }
 });
 </script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+  .then(() => console.log("Service Worker Registered"));
+}
+</script
 </body>
-</html> 
+</html>
