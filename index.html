@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام إدارة الأصول | المعهد الوطني للعلوم الإدارية</title>
+
+<!-- الخط العربي -->
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Manifest PWA -->
+<link rel="manifest" href="manifest.json">
+
 <style>
 body{font-family:"Tahoma", Arial, sans-serif;margin:0;background:#f4f6f9;}
 #loginPage{height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0d6efd,#001f4d);}
@@ -112,11 +118,9 @@ table img{width:60px;height:60px;object-fit:cover;border-radius:8px;}
 
 <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 <script>
-//////////////////////////
-// IndexedDB
-//////////////////////////
+// ------------------ IndexedDB ------------------
 let db, lastAssetNumber = 0;
-let userRole = "admin"; // مؤقت
+let userRole = "admin";
 
 const request = indexedDB.open("AssetDatabase", 4);
 
@@ -156,12 +160,7 @@ function setNextAssetId(){
     document.getElementById("assetId").value = 'AS-'+(lastAssetNumber+1).toString().padStart(4,'0');
 }
 
-// صلاحية المدير
-function isAdmin(){ return userRole==="admin"; }
-
-//////////////////////////
-// إضافة أصل
-//////////////////////////
+// ------------------ إضافة أصل ------------------
 function addItem(){
     if(!itemName.value.trim()){ alert("أدخل اسم الصنف"); return; }
     const file=imageInput.files[0]; if(!file){ alert("أضف صورة"); return; }
@@ -199,14 +198,11 @@ function addItem(){
     };
     reader.readAsDataURL(file);
 }
-  
+
 function clearForm(){
     itemName.value=''; quantity.value='1'; value.value=''; depreciation.value='0'; entryDate.value=''; imageInput.value='';
 }
-
-//////////////////////////
-// عرض البيانات
-//////////////////////////
+  // ------------------ عرض البيانات ------------------
 function renderTable(){
     inventoryTable.innerHTML='';
     let total=0;
@@ -243,9 +239,7 @@ function deleteItem(id){
     }
 }
 
-//////////////////////////
-// البحث
-//////////////////////////
+// ------------------ البحث ------------------
 function searchTable(){
     const val=searchInput.value.toLowerCase().trim();
     inventoryTable.innerHTML='';
@@ -275,22 +269,17 @@ function searchTable(){
     };
 }
 
-//////////////////////////
-// تنزيل Excel احترافي
-//////////////////////////
+// ------------------ Excel ------------------
 async function exportToExcel(){
     const workbook=new ExcelJS.Workbook();
     const ws=workbook.addWorksheet("تقرير الأصول");
-    // عناوين
     ws.mergeCells('A1:H2');
     ws.getCell('A1').value="تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
     ws.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
     ws.getCell('A1').font={size:16,bold:true,color:{argb:'FF0D6EFD'}};
-    
     ws.addRow([]);
     const header = ["رقم الأصل","الصنف","العدد","القيمة","نسبة الاهلاك %","العمر (سنة)","القيمة بعد الاهلاك","التاريخ","الصورة"];
     ws.addRow(header).eachCell(c=>{c.font={bold:true}; c.alignment={horizontal:'center'}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFD966'}};});
-
     const tx=db.transaction("assets","readonly"); 
     const store=tx.objectStore("assets");
     const items=[];
@@ -300,7 +289,6 @@ async function exportToExcel(){
             if(cursor){ items.push(cursor.value); cursor.continue(); } else { resolve(); }
         };
     });
-
     for(const item of items){
         const row=ws.addRow([item.assetId,item.itemName,item.quantity,item.value,item.depreciation,item.age,item.finalValue,item.entryDate,""]);
         row.height=65;
@@ -319,9 +307,7 @@ async function exportToExcel(){
     link.click();
 }
 
-//////////////////////////
-// النسخة الاحتياطية
-//////////////////////////
+// ------------------ نسخة احتياطية ------------------
 function exportToJSON(){
     const tx=db.transaction("assets","readonly");
     const store=tx.objectStore("assets");
@@ -335,10 +321,9 @@ function exportToJSON(){
             link.download="inventory_backup.json"; link.click();
         }
     };
-                
-   //////////////////////////
-// مسح البيانات
-//////////////////////////
+}
+
+// ------------------ مسح البيانات ------------------
 function clearAllData(){
     if(confirm("هل أنت متأكد؟")){
         const tx=db.transaction("assets","readwrite"); tx.objectStore("assets").clear();
@@ -348,9 +333,7 @@ function clearAllData(){
     }
 }
 
-//////////////////////////
-// تسجيل الدخول والخروج
-//////////////////////////
+// ------------------ تسجيل الدخول والخروج ------------------
 function login(){
     if(username.value==="admin" && password.value==="1234"){
         localStorage.setItem("loggedIn","true");
@@ -365,19 +348,18 @@ function logout(){
     location.reload();
 }
 
-// تفعيل الدخول التلقائي
 window.addEventListener('load',()=>{
     if(localStorage.getItem("loggedIn")==="true"){
         loginPage.style.display="none";
         appPage.style.display="block";
     }
 });
-</script>
-<script>
+ // ------------------ Service Worker ------------------
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
-  .then(() => console.log("Service Worker Registered"));
+  .then(() => console.log("Service Worker Registered"))
+  .catch(err=>console.log("SW registration failed:",err));
 }
-</script
+</script>
 </body>
-</html>
+</html> 
