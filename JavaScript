@@ -4,9 +4,9 @@
 
 let db;
 let lastAssetNumber = 0;
-let userRole = localStorage.getItem("userRole") || "admin"; // مؤقتاً مدير
+let userRole = localStorage.getItem("userRole") || "user";
 
-const request = indexedDB.open("AssetDatabase", 3);
+const request = indexedDB.open("AssetDatabase", 1);
 
 request.onupgradeneeded = function(e){
     db = e.target.result;
@@ -28,32 +28,27 @@ request.onsuccess = function(e){
 };
 
 request.onerror = function(){
-    alert("فشل في فتح قاعدة البيانات");
+    alert("خطأ في فتح قاعدة البيانات");
 };
 
 // =========================
-// إدارة رقم الأصل
+// تحميل آخر رقم أصل
 // =========================
 
 function loadLastAssetNumber(){
-    const tx = db.transaction("settings", "readonly");
+    const tx = db.transaction(["settings"], "readonly");
     const store = tx.objectStore("settings");
     const req = store.get("lastAssetNumber");
 
     req.onsuccess = function(){
         lastAssetNumber = req.result ? req.result.value : 0;
-        setNextAssetId(); // تجهيز الرقم الفريد
     };
 }
 
 function saveLastAssetNumber(){
-    const tx = db.transaction("settings", "readwrite");
-    tx.objectStore("settings").put({ key:"lastAssetNumber", value:lastAssetNumber });
-}
-
-function setNextAssetId(){
-    document.getElementById("assetId").value =
-        'AS-' + (lastAssetNumber + 1).toString().padStart(4,'0');
+    const tx = db.transaction(["settings"], "readwrite");
+    const store = tx.objectStore("settings");
+    store.put({ key:"lastAssetNumber", value:lastAssetNumber });
 }
 
 // =========================
@@ -81,10 +76,6 @@ function addItem(){
         return;
     }
 
-    const count = parseInt(assetCount.value) || 1;
-    const assetAge = parseInt(assetAgeInput.value) || 0;
-    const depreciationRate = parseFloat(depreciationRateInput.value) || 0;
-
     lastAssetNumber++;
     const newAssetId = 'AS-' + lastAssetNumber.toString().padStart(4,'0');
 
@@ -92,34 +83,26 @@ function addItem(){
 
     reader.onload = function(e){
 
-        // حساب الاهلاك
-        const valueNum = parseFloat(value.value) || 0;
-        const depreciationValue = valueNum * (depreciationRate/100) * assetAge;
-        const finalValue = Math.max(0, (valueNum - depreciationValue) * count);
-
         const newItem = {
             assetId: newAssetId,
             itemName: itemName.value.trim(),
-            count: count,
             category: category.value.trim(),
             department: department.value.trim(),
-            value: valueNum,
+            location: location.value.trim(),
+            value: parseFloat(value.value) || 0,
             entryDate: entryDate.value || '',
             condition: condition.value || '',
-            age: assetAge,
-            depreciationRate: depreciationRate,
-            finalValue: finalValue,
             image: e.target.result
         };
 
         const tx = db.transaction(["assets"], "readwrite");
-        tx.objectStore("assets").put(newItem);
+        const store = tx.objectStore("assets");
+        store.put(newItem);
 
         tx.oncomplete = function(){
             saveLastAssetNumber();
             renderTable();
             clearForm();
-            setNextAssetId();
         };
     };
 
@@ -132,21 +115,21 @@ function addItem(){
 
 function clearForm(){
     itemName.value='';
-    assetCount.value='1';
     category.value='';
     department.value='';
+    location.value='';
     value.value='';
     entryDate.value='';
     condition.value='';
-    assetAgeInput.value='0';
-    depreciationRateInput.value='0';
     imageInput.value='';
 }
+
 // =========================
 // عرض الجدول
 // =========================
 
 function renderTable(){
+
     inventoryTable.innerHTML = '';
     let total = 0;
 
@@ -157,6 +140,7 @@ function renderTable(){
 
         const cursor = e.target.result;
         if(cursor){
+
             const item = cursor.value;
 
             const deleteButton = isAdmin()
@@ -167,13 +151,10 @@ function renderTable(){
             <tr>
                 <td>${item.assetId}</td>
                 <td>${item.itemName}</td>
-                <td>${item.count}</td>
                 <td>${item.category || '-'}</td>
                 <td>${item.department || '-'}</td>
-                <td>${item.value.toLocaleString()}</td>
-                <td>${item.age}</td>
-                <td>${item.depreciationRate}%</td>
-                <td>${item.finalValue.toLocaleString()}</td>
+                <td>${item.location || '-'}</td>
+                <td>${(item.value || 0).toLocaleString()}</td>
                 <td>${item.entryDate || '-'}</td>
                 <td>${item.condition || '-'}</td>
                 <td><img src="${item.image}" width="60"></td>
@@ -181,12 +162,12 @@ function renderTable(){
             </tr>
             `;
 
-            total += item.finalValue || 0;
+            total += item.value || 0;
             cursor.continue();
         }
 
         document.getElementById('totalValue').innerText =
-        'القيمة النهائية الإجمالية: ' + total.toLocaleString() + ' ريال يمني';
+        'إجمالي القيمة: ' + total.toLocaleString() + ' ريال يمني';
     };
 }
 
@@ -204,21 +185,76 @@ function deleteItem(assetId){
     if(confirm("هل تريد حذف هذا الأصل؟")){
 
         const tx = db.transaction(["assets"], "readwrite");
-        tx.objectStore("assets").delete(assetId);
+        const store = tx.objectStore("assets");
+        store.delete(assetId);
 
         tx.oncomplete = function(){
             renderTable();
         };
     }
 }
-
 // =========================
 // البحث
 // =========================
 
 function searchTable(){
-    const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+
+    const searchValue = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
     inventoryTable.innerHTML = '';
+
+    const tx = db.transaction(["assets"], "readonly");
+    const store = tx.objectStore("assets");
+
+    store.openCursor().onsuccess = function(e){
+
+        const cursor = e.target.result;
+        if(cursor){
+
+            const item = cursor.value;
+
+            if(
+                item.assetId.toLowerCase().includes(searchValue) ||
+                item.itemName.toLowerCase().includes(searchValue)
+            ){
+                inventoryTable.innerHTML += `
+                <tr>
+                    <td>${item.assetId}</td>
+                    <td>${item.itemName}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.department || '-'}</td>
+                    <td>${item.location || '-'}</td>
+                    <td>${(item.value || 0).toLocaleString()}</td>
+                    <td>${item.entryDate || '-'}</td>
+                    <td>${item.condition || '-'}</td>
+                    <td><img src="${item.image}" width="60"></td>
+                    <td></td>
+                </tr>
+                `;
+            }
+
+            cursor.continue();
+        }
+    };
+}
+
+// =========================
+// تصدير Excel (CSV)
+// =========================
+
+function exportToExcel(){
+
+    if(!isAdmin()){
+        alert("غير مصرح لك بالتصدير");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+    csvContent += "رقم الأصل,الصنف,الفئة,القسم,الموقع,القيمة,التاريخ,الحالة\n";
 
     const tx = db.transaction(["assets"], "readonly");
     const store = tx.objectStore("assets");
@@ -228,113 +264,19 @@ function searchTable(){
         if(cursor){
             const item = cursor.value;
 
-            if(item.assetId.toLowerCase().includes(searchValue) || 
-               item.itemName.toLowerCase().includes(searchValue)){
-                inventoryTable.innerHTML += `
-                <tr>
-                    <td>${item.assetId}</td>
-                    <td>${item.itemName}</td>
-                    <td>${item.count}</td>
-                    <td>${item.category || '-'}</td>
-                    <td>${item.department || '-'}</td>
-                    <td>${item.value.toLocaleString()}</td>
-                    <td>${item.age}</td>
-                    <td>${item.depreciationRate}%</td>
-                    <td>${item.finalValue.toLocaleString()}</td>
-                    <td>${item.entryDate || '-'}</td>
-                    <td>${item.condition || '-'}</td>
-                    <td><img src="${item.image}" width="60"></td>
-                    <td></td>
-                </tr>`;
-            }
+            csvContent +=
+            `${item.assetId},${item.itemName},${item.category},${item.department},${item.location},${item.value},${item.entryDate},${item.condition}\n`;
+
             cursor.continue();
+        }else{
+            const link = document.createElement("a");
+            link.href = encodeURI(csvContent);
+            link.download = "inventory_report.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
-}
-
-// =========================
-// تصدير Excel مع شعارات وعناوين احترافية
-// =========================
-
-async function exportToExcel(){
-    if(!isAdmin()){
-        alert("غير مصرح لك بالتصدير");
-        return;
-    }
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("تقرير الأصول");
-
-    // العنوان الرئيسي
-    worksheet.mergeCells('A1:L3');
-    worksheet.getCell('A1').value = "تقرير الجرد الإلكتروني - المعهد الوطني للعلوم الإدارية فرع إب";
-    worksheet.getCell('A1').alignment = {horizontal:'center', vertical:'middle'};
-    worksheet.getCell('A1').font = {size:18, bold:true, color:{argb:'FF0D6EFD'}};
-
-    // إضافة شعارات (يمكن تعديل المسار)
-    // workbook.addImage requires base64
-    // مثال: شعار البرنامج وشعار المعهد
-    // const logoId = workbook.addImage({base64: base64Logo1, extension:'png'});
-    // worksheet.addImage(logoId, {tl:{col:0,row:0}, ext:{width:80,height:80}});
-    // const logoId2 = workbook.addImage({base64: base64Logo2, extension:'png'});
-    // worksheet.addImage(logoId2, {tl:{col:11,row:0}, ext:{width:80,height:80}});
-
-    worksheet.addRow([]);
-    const header = ["رقم الأصل","الصنف","العدد","الفئة","القسم","القيمة","العمر","نسبة الاهلاك","القيمة بعد الاهلاك","التاريخ","الحالة","الصورة"];
-    const headerRow = worksheet.addRow(header);
-    headerRow.eachCell(cell => {
-        cell.font = {bold:true};
-        cell.alignment = {horizontal:'center', vertical:'middle'};
-        cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FF0D6EFD'}, bgColor:{argb:'FFFFFFFF'}};
-        cell.font = {color:{argb:'FFFFFFFF'}, bold:true};
-    });
-
-    const tx = db.transaction(["assets"], "readonly");
-    const store = tx.objectStore("assets");
-    const items = [];
-
-    await new Promise(resolve => {
-        store.openCursor().onsuccess = e => {
-            const cursor = e.target.result;
-            if(cursor){ items.push(cursor.value); cursor.continue(); } else { resolve(); }
-        };
-    });
-
-    for(const item of items){
-        const row = worksheet.addRow([
-            item.assetId,
-            item.itemName,
-            item.count,
-            item.category,
-            item.department,
-            item.value,
-            item.age,
-            item.depreciationRate + '%',
-            item.finalValue,
-            item.entryDate,
-            item.condition,
-            ""
-        ]);
-        row.height = 60;
-
-        if(item.image){
-            const imageId = workbook.addImage({base64:item.image, extension:'png'});
-            worksheet.addImage(imageId, {tl:{col:11,row:row.number-1}, ext:{width:60,height:60}});
-        }
-
-        row.eachCell(cell => { cell.alignment = {horizontal:'center', vertical:'middle'}; });
-    }
-
-    worksheet.columns = [
-        {width:15},{width:25},{width:10},{width:15},{width:15},{width:15},{width:10},{width:15},{width:20},{width:15},{width:15},{width:20}
-    ];
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "تقرير_الجرد.xlsx";
-    link.click();
 }
 
 // =========================
@@ -342,15 +284,22 @@ async function exportToExcel(){
 // =========================
 
 function clearAllData(){
-    if(!isAdmin()){ alert("غير مصرح لك"); return; }
+
+    if(!isAdmin()){
+        alert("غير مصرح لك");
+        return;
+    }
+
     if(confirm("هل أنت متأكد من حذف جميع البيانات؟")){
+
         const tx = db.transaction(["assets"], "readwrite");
-        tx.objectStore("assets").clear();
+        const store = tx.objectStore("assets");
+        store.clear();
+
         tx.oncomplete = function(){
             lastAssetNumber = 0;
             saveLastAssetNumber();
             renderTable();
-            setNextAssetId();
             alert("تم حذف جميع البيانات");
         };
     }
