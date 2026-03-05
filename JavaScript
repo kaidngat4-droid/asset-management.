@@ -300,3 +300,48 @@ window.addEventListener('load',()=>{
     }
 });
 </script>
+///////////////////////////////
+// حساب إجمالي القيمة بعد الاهلاك تلقائياً
+///////////////////////////////
+
+function calculateTotalAfterDepreciation(){
+
+    let total = 0;
+
+    // قراءة جميع الصفوف من الجدول
+    const rows = document.querySelectorAll("#inventoryTable tr");
+
+    rows.forEach(row => {
+
+        // العمود رقم 7 هو القيمة بعد الاهلاك
+        const cell = row.cells[6];
+
+        if(cell){
+
+            // إزالة الفواصل من الرقم
+            const value = cell.innerText.replace(/,/g,'');
+
+            const number = parseFloat(value);
+
+            if(!isNaN(number)){
+                total += number;
+            }
+
+        }
+
+    });
+
+    // عرض الإجمالي
+    const totalDiv = document.getElementById("totalValue");
+
+    if(totalDiv){
+        totalDiv.innerText =
+        "إجمالي القيمة بعد الاهلاك: "
+        + total.toLocaleString()
+        + " ريال يمني";
+    }
+
+}
+
+// إعادة الحساب بعد تحديث الجدول
+setInterval(calculateTotalAfterDepreciation,1000);
