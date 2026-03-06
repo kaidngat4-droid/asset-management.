@@ -1,9 +1,11 @@
-"name": "نظام إدارة الأصول - المعهد الوطني للعلوم الإدارية",
+{
+  "name": "نظام إدارة الأصول - المعهد الوطني للعلوم الإدارية",
   "short_name": "أصول المعهد",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0d6efd",
   "theme_color": "#0d6efd",
+  "description": "تطبيق الجرد الإلكتروني لإدارة الأصول في المعهد الوطني للعلوم الإدارية فرع إب",
   "icons": [
     {
       "src": "assets/logo-institute.png",
