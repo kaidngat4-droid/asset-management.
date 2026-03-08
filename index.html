@@ -361,5 +361,118 @@ if ("serviceWorker" in navigator) {
   .catch(err=>console.log("SW registration failed:",err));
 }
 </script>
+   <script>
+/////////////////////////////////////////////////
+// إعداد قاعدة البيانات IndexedDB
+/////////////////////////////////////////////////
+
+let db;
+let lastAssetNumber = 0;
+
+function initDatabase(){
+
+    const request = indexedDB.open("AssetDatabase", 1);
+
+    // إنشاء الجداول أول مرة
+    request.onupgradeneeded = function(e){
+
+        db = e.target.result;
+
+        if(!db.objectStoreNames.contains("assets")){
+            db.createObjectStore("assets",{ keyPath:"assetId" });
+        }
+
+        if(!db.objectStoreNames.contains("settings")){
+            db.createObjectStore("settings",{ keyPath:"key" });
+        }
+
+        console.log("تم إنشاء قاعدة البيانات");
+    };
+
+    // نجاح فتح قاعدة البيانات
+    request.onsuccess = function(e){
+
+        db = e.target.result;
+
+        console.log("تم فتح قاعدة البيانات بنجاح");
+
+        loadLastAssetNumber();
+        renderTable();
+
+    };
+
+    // حدوث خطأ
+    request.onerror = function(e){
+
+        console.error("خطأ في قاعدة البيانات:", e);
+
+        alert("❌ فشل في فتح قاعدة البيانات");
+
+    };
+
+}
+
+/////////////////////////////////////////////////
+// تحميل رقم الأصل
+/////////////////////////////////////////////////
+
+function loadLastAssetNumber(){
+
+    const tx = db.transaction("settings","readonly");
+    const store = tx.objectStore("settings");
+
+    const req = store.get("lastAssetNumber");
+
+    req.onsuccess = function(){
+
+        lastAssetNumber = req.result ? req.result.value : 0;
+
+        setNextAssetId();
+
+    };
+
+}
+
+/////////////////////////////////////////////////
+// حفظ رقم الأصل
+/////////////////////////////////////////////////
+
+function saveLastAssetNumber(){
+
+    const tx = db.transaction("settings","readwrite");
+
+    const store = tx.objectStore("settings");
+
+    store.put({
+        key:"lastAssetNumber",
+        value:lastAssetNumber
+    });
+
+}
+
+/////////////////////////////////////////////////
+// إنشاء رقم أصل جديد
+/////////////////////////////////////////////////
+
+function setNextAssetId(){
+
+    const idField = document.getElementById("assetId");
+
+    if(idField){
+        idField.value = 'AS-' + (lastAssetNumber+1).toString().padStart(4,'0');
+    }
+
+}
+
+/////////////////////////////////////////////////
+// تشغيل قاعدة البيانات بعد تحميل الصفحة
+/////////////////////////////////////////////////
+
+window.addEventListener("load", function(){
+
+    initDatabase();
+
+});
+   </script> 
 </body>
 </html> 
