@@ -31,3 +31,45 @@
         /* وهكذا تكمل باقي CSS ... */
     </style>
 </head>
+/* ===== توقيع المطور بالنيون المتحرك ===== */
+.developerSignatureNeon {
+    margin-top: 15px;
+    font-size: 16px;
+    text-align: center;
+    font-weight: 700;
+    font-family: 'Aref Ruqaa', serif;
+    letter-spacing: 1.5px;
+
+    /* تدرج ألوان نيون */
+    background: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7f00,
+        #ffff00,
+        #00ffcc,
+        #007fff,
+        #ff00ff
+    );
+    background-size: 600%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+    /* توهج نيون */
+    text-shadow:
+        0 0 5px #ff0000,
+        0 0 10px #ff7f00,
+        0 0 15px #ffff00,
+        0 0 20px #00ffcc,
+        0 0 25px #007fff,
+        0 0 30px #ff00ff;
+
+    /* حركة التدرج */
+    animation: neonGlow 8s linear infinite alternate;
+}
+
+@keyframes neonGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
